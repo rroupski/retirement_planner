@@ -1,0 +1,29 @@
+<.header>
+  Retirement goal {@retirement_goal.id}
+  <:subtitle>This is a retirement_goal record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/retirement_goals/#{@retirement_goal}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit retirement_goal</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Target retirement age">{@retirement_goal.target_retirement_age}</:item>
+  <:item title="Desired annual income">{@retirement_goal.desired_annual_income}</:item>
+  <:item title="Current age">{@retirement_goal.current_age}</:item>
+  <:item title="Inflation rate">{@retirement_goal.inflation_rate}</:item>
+</.list>
+
+<.back navigate={~p"/retirement_goals"}>Back to retirement_goals</.back>
+
+<.modal :if={@live_action == :edit} id="retirement_goal-modal" show on_cancel={JS.patch(~p"/retirement_goals/#{@retirement_goal}")}>
+  <.live_component
+    module={RetirementPlannerWeb.RetirementGoalLive.FormComponent}
+    id={@retirement_goal.id}
+    title={@page_title}
+    action={@live_action}
+    retirement_goal={@retirement_goal}
+    patch={~p"/retirement_goals/#{@retirement_goal}"}
+  />
+</.modal>

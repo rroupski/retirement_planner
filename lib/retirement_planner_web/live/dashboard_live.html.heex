@@ -1,0 +1,273 @@
+<.header>
+  Retirement Planning Dashboard
+  <:subtitle>Plan and optimize your retirement strategy</:subtitle>
+</.header>
+
+<div class="space-y-8">
+  <%= if not @has_goal do %>
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <.icon name="hero-information-circle" class="h-5 w-5 text-blue-400" />
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">
+            Get Started with Your Retirement Plan
+          </h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <p>Set your retirement goals to begin creating personalized projections and recommendations.</p>
+          </div>
+          <div class="mt-4">
+            <div class="-mx-2 -my-1.5 flex">
+              <.link patch={~p"/dashboard/goal/new"} class="bg-blue-100 px-2 py-1.5 rounded-md text-sm font-medium text-blue-800 hover:bg-blue-200">
+                Set Retirement Goal
+              </.link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Retirement Goal Summary -->
+  <%= if @has_goal do %>
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Retirement Goal
+          </h3>
+          <.link patch={~p"/dashboard/goal/edit/#{@goal.id}"} class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+            Edit
+          </.link>
+        </div>
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Current Age</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @goal.current_age %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Target Retirement Age</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @goal.target_retirement_age %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Desired Annual Income</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= format_currency(@goal.desired_annual_income) %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Inflation Rate</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= Decimal.to_float(@goal.inflation_rate) %>%</dd>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projection Results -->
+    <%= if @projection do %>
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+            Retirement Projection
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="bg-green-50 p-4 rounded-lg">
+              <dt class="text-sm font-medium text-green-600">Projected Balance</dt>
+              <dd class="mt-1 text-2xl font-semibold text-green-900">
+                <%= format_currency(@projection.projected_balance) %>
+              </dd>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <dt class="text-sm font-medium text-blue-600">Nest Egg Needed</dt>
+              <dd class="mt-1 text-2xl font-semibold text-blue-900">
+                <%= format_currency(@projection.nest_egg_needed) %>
+              </dd>
+            </div>
+            <%= if @projection.shortfall > 0 do %>
+              <div class="bg-red-50 p-4 rounded-lg">
+                <dt class="text-sm font-medium text-red-600">Shortfall</dt>
+                <dd class="mt-1 text-2xl font-semibold text-red-900">
+                  <%= format_currency(@projection.shortfall) %>
+                </dd>
+              </div>
+              <div class="bg-yellow-50 p-4 rounded-lg">
+                <dt class="text-sm font-medium text-yellow-600">Additional Monthly Savings Needed</dt>
+                <dd class="mt-1 text-2xl font-semibold text-yellow-900">
+                  <%= format_currency(@projection.recommended_monthly_savings) %>
+                </dd>
+              </div>
+            <% else %>
+              <div class="bg-green-50 p-4 rounded-lg">
+                <dt class="text-sm font-medium text-green-600">Status</dt>
+                <dd class="mt-1 text-lg font-semibold text-green-900">
+                  ✓ On Track
+                </dd>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="mt-4 text-sm text-gray-600">
+            <p>Years until retirement: <%= @projection.years_until_retirement %></p>
+            <p>Inflation-adjusted income needed: <%= format_currency(@projection.inflation_adjusted_income) %></p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <!-- Retirement Accounts -->
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Retirement Accounts
+        </h3>
+        <.link patch={~p"/dashboard/accounts/new"} class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+          Add Account
+        </.link>
+      </div>
+      
+      <%= if Enum.empty?(@accounts) do %>
+        <div class="text-center py-8">
+          <.icon name="hero-building-library" class="mx-auto h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No retirement accounts</h3>
+          <p class="mt-1 text-sm text-gray-500">Get started by adding your first retirement account.</p>
+        </div>
+      <% else %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Annual Contribution</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employer Match</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <%= for account <- @accounts do %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <%= account.name %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= account.account_type %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= format_currency(account.current_balance) %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= format_currency(account.annual_contribution || Decimal.new(0)) %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= format_currency(account.employer_match || Decimal.new(0)) %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Investment Allocations -->
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Investment Allocations
+        </h3>
+        <.link patch={~p"/dashboard/investments/new"} class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+          Add Investment
+        </.link>
+      </div>
+      
+      <%= if Enum.empty?(@investments) do %>
+        <div class="text-center py-8">
+          <.icon name="hero-chart-pie" class="mx-auto h-12 w-12 text-gray-400" />
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No investment allocations</h3>
+          <p class="mt-1 text-sm text-gray-500">Define your investment strategy to get more accurate projections.</p>
+        </div>
+      <% else %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Investment</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Allocation</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Return</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <%= for investment <- @investments do %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <%= investment.name %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= investment.symbol %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= Decimal.to_float(investment.allocation_percentage) %>%
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= Decimal.to_float(investment.expected_return) %>%
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{risk_badge_class(investment.risk_level)}"}>
+                      <%= investment.risk_level %>
+                    </span>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+          <p class="text-sm text-gray-600">
+            Total Allocation: <%= @investments |> Enum.reduce(Decimal.new(0), fn inv, acc -> Decimal.add(acc, inv.allocation_percentage) end) |> Decimal.to_float() %>%
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<.modal :if={@live_action in [:new_goal, :edit_goal]} id="goal-modal" show on_cancel={JS.patch(~p"/dashboard")}>
+  <.live_component
+    module={RetirementPlannerWeb.DashboardLive.GoalFormComponent}
+    id={@goal.id || :new}
+    title={@page_title}
+    action={@live_action}
+    goal={@goal}
+    patch={~p"/dashboard"}
+  />
+</.modal>
+
+<.modal :if={@live_action == :new_account} id="account-modal" show on_cancel={JS.patch(~p"/dashboard")}>
+  <.live_component
+    module={RetirementPlannerWeb.DashboardLive.AccountFormComponent}
+    id={@account.id || :new}
+    title={@page_title}
+    action={@live_action}
+    account={@account}
+    patch={~p"/dashboard"}
+  />
+</.modal>
+
+<.modal :if={@live_action == :new_investment} id="investment-modal" show on_cancel={JS.patch(~p"/dashboard")}>
+  <.live_component
+    module={RetirementPlannerWeb.DashboardLive.InvestmentFormComponent}
+    id={@investment.id || :new}
+    title={@page_title}
+    action={@live_action}
+    investment={@investment}
+    patch={~p"/dashboard"}
+  />
+</.modal>

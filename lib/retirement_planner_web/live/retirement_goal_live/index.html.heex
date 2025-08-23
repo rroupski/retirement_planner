@@ -1,0 +1,44 @@
+<.header>
+  Listing Retirement goals
+  <:actions>
+    <.link patch={~p"/retirement_goals/new"}>
+      <.button>New Retirement goal</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="retirement_goals"
+  rows={@streams.retirement_goals}
+  row_click={fn {_id, retirement_goal} -> JS.navigate(~p"/retirement_goals/#{retirement_goal}") end}
+>
+  <:col :let={{_id, retirement_goal}} label="Target retirement age">{retirement_goal.target_retirement_age}</:col>
+  <:col :let={{_id, retirement_goal}} label="Desired annual income">{retirement_goal.desired_annual_income}</:col>
+  <:col :let={{_id, retirement_goal}} label="Current age">{retirement_goal.current_age}</:col>
+  <:col :let={{_id, retirement_goal}} label="Inflation rate">{retirement_goal.inflation_rate}</:col>
+  <:action :let={{_id, retirement_goal}}>
+    <div class="sr-only">
+      <.link navigate={~p"/retirement_goals/#{retirement_goal}"}>Show</.link>
+    </div>
+    <.link patch={~p"/retirement_goals/#{retirement_goal}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, retirement_goal}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: retirement_goal.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="retirement_goal-modal" show on_cancel={JS.patch(~p"/retirement_goals")}>
+  <.live_component
+    module={RetirementPlannerWeb.RetirementGoalLive.FormComponent}
+    id={@retirement_goal.id || :new}
+    title={@page_title}
+    action={@live_action}
+    retirement_goal={@retirement_goal}
+    patch={~p"/retirement_goals"}
+  />
+</.modal>
