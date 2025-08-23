@@ -115,6 +115,49 @@
     <% end %>
   <% end %>
 
+  <!-- Charts Section -->
+  <%= if @has_goal and @projection do %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Retirement Projection Timeline -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="h-80">
+            <canvas id="projection-chart" phx-hook="Chart" data-chart-config={@projection_chart_data}></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Savings Scenarios -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="h-80">
+            <canvas id="savings-chart" phx-hook="Chart" data-chart-config={@savings_chart_data}></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Account Allocation -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="h-80">
+            <canvas id="account-chart" phx-hook="Chart" data-chart-config={@account_chart_data}></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investment Allocation -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="h-80">
+            <canvas id="investment-chart" phx-hook="Chart" data-chart-config={@investment_chart_data}></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
   <!-- Retirement Accounts -->
   <div class="bg-white overflow-hidden shadow rounded-lg">
     <div class="px-4 py-5 sm:p-6">

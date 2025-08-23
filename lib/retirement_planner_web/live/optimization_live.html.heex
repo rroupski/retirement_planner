@@ -1,0 +1,547 @@
+<.header>
+  Advanced Retirement Optimization
+  <:subtitle>Leverage sophisticated algorithms to optimize your retirement strategy</:subtitle>
+</.header>
+
+<div class="space-y-8">
+  <%= if not @has_goal do %>
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <.icon name="hero-information-circle" class="h-5 w-5 text-blue-400" />
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">
+            Set Up Your Retirement Plan First
+          </h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <p>
+              Before running optimizations, you need to set up your retirement goals and accounts.
+            </p>
+          </div>
+          <div class="mt-4">
+            <div class="-mx-2 -my-1.5 flex">
+              <.link
+                navigate={~p"/dashboard"}
+                class="bg-blue-100 px-2 py-1.5 rounded-md text-sm font-medium text-blue-800 hover:bg-blue-200"
+              >
+                Go to Dashboard
+              </.link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <!-- Optimization Controls -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+          Optimization Tools
+        </h3>
+        
+<!-- Individual Optimizations -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+          <button
+            phx-click="run_monte_carlo"
+            disabled={@loading_optimization}
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            <%= if @loading_optimization do %>
+              <.icon name="hero-arrow-path" class="animate-spin -ml-1 mr-2 h-4 w-4" />
+            <% end %>
+            Risk Analysis
+          </button>
+
+          <button
+            phx-click="run_asset_optimization"
+            disabled={@loading_optimization}
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+          >
+            <%= if @loading_optimization do %>
+              <.icon name="hero-arrow-path" class="animate-spin -ml-1 mr-2 h-4 w-4" />
+            <% end %>
+            Asset Allocation
+          </button>
+
+          <button
+            phx-click="run_timeline_optimization"
+            disabled={@loading_optimization}
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+          >
+            <%= if @loading_optimization do %>
+              <.icon name="hero-arrow-path" class="animate-spin -ml-1 mr-2 h-4 w-4" />
+            <% end %>
+            Timeline
+          </button>
+
+          <button
+            phx-click="clear_results"
+            disabled={@loading_optimization}
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            Clear Results
+          </button>
+        </div>
+        
+<!-- Comprehensive Optimization -->
+        <div class="border-t pt-4">
+          <h4 class="text-md font-medium text-gray-900 mb-3">Comprehensive Optimization</h4>
+          <form
+            phx-submit="run_comprehensive_optimization"
+            class="flex flex-col sm:flex-row gap-4"
+          >
+            <div class="flex-grow">
+              <label for="monthly_amount" class="block text-sm font-medium text-gray-700">
+                Available Monthly Amount (Optional)
+              </label>
+              <div class="mt-1 relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-500 sm:text-sm">$</span>
+                </div>
+                <input
+                  type="number"
+                  name="monthly_amount"
+                  id="monthly_amount"
+                  class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                  placeholder="1000"
+                  min="0"
+                  step="50"
+                  value={@available_monthly_amount}
+                />
+              </div>
+            </div>
+            <div class="flex items-end">
+              <button
+                type="submit"
+                disabled={@loading_optimization}
+                class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+              >
+                <%= if @loading_optimization do %>
+                  <.icon name="hero-arrow-path" class="animate-spin -ml-1 mr-2 h-4 w-4" />
+                <% end %>
+                Run Full Analysis
+              </button>
+            </div>
+          </form>
+          <p class="mt-2 text-sm text-gray-500">
+            Runs Monte Carlo simulation, asset allocation optimization, contribution optimization (if amount provided), and timeline analysis.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+<!-- Results Section -->
+    <%= if @optimization_results do %>
+      <!-- Individual Results -->
+      <%= if @optimization_results[:monte_carlo] do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Monte Carlo Risk Analysis
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h4 class="text-sm font-medium text-gray-900 mb-2">Success Probability</h4>
+                  <div class="text-3xl font-bold text-gray-900">
+                    {format_percentage(@optimization_results.monte_carlo.success_rate)}
+                  </div>
+                  <div class="text-sm text-gray-600 mt-2">
+                    Based on {Number.Delimit.number_to_delimited(
+                      @optimization_results.monte_carlo.simulations_run
+                    )} simulations
+                  </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-4">
+                  <h4 class="text-sm font-medium text-blue-900 mb-2">Risk Assessment</h4>
+                  <div class={[
+                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                    case @optimization_results.monte_carlo.risk_assessment do
+                      :low -> "bg-green-100 text-green-800"
+                      :moderate -> "bg-yellow-100 text-yellow-800"
+                      :high -> "bg-orange-100 text-orange-800"
+                      :very_high -> "bg-red-100 text-red-800"
+                    end
+                  ]}>
+                    {String.upcase(to_string(@optimization_results.monte_carlo.risk_assessment))
+                    |> String.replace("_", " ")}
+                  </div>
+                </div>
+
+                <div class="bg-green-50 rounded-lg p-4">
+                  <h4 class="text-sm font-medium text-green-900 mb-2">Recommendation</h4>
+                  <p class="text-sm text-green-800">
+                    {@optimization_results.monte_carlo.recommendation}
+                  </p>
+                </div>
+              </div>
+
+              <div class="h-80">
+                <canvas
+                  id="monte-carlo-chart"
+                  phx-hook="Chart"
+                  data-chart-config={@optimization_results.monte_carlo_chart_data}
+                >
+                </canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= if @optimization_results[:asset_optimization] do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Asset Allocation Optimization
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-1">Expected Return</h4>
+                    <div class="text-xl font-bold text-gray-900">
+                      {format_percentage(
+                        @optimization_results.asset_optimization.expected_return * 100
+                      )}
+                    </div>
+                  </div>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-1">Volatility</h4>
+                    <div class="text-xl font-bold text-gray-900">
+                      {format_percentage(
+                        @optimization_results.asset_optimization.expected_volatility * 100
+                      )}
+                    </div>
+                  </div>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-1">Sharpe Ratio</h4>
+                    <div class="text-xl font-bold text-gray-900">
+                      {:erlang.float_to_binary(
+                        @optimization_results.asset_optimization.sharpe_ratio,
+                        [{:decimals, 2}]
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <%= if not Enum.empty?(@optimization_results.asset_optimization.rebalancing_recommendations) do %>
+                  <div class="bg-yellow-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-yellow-900 mb-2">
+                      Rebalancing Recommendations
+                    </h4>
+                    <div class="space-y-2">
+                      <%= for rebalance <- @optimization_results.asset_optimization.rebalancing_recommendations do %>
+                        <div class="flex justify-between items-center text-sm">
+                          <span class="font-medium text-yellow-800">{rebalance.asset_class}</span>
+                          <span class="text-yellow-700">
+                            {format_percentage(rebalance.current_allocation * 100)} → {format_percentage(
+                              rebalance.target_allocation * 100
+                            )}
+                          </span>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% else %>
+                  <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-green-900 mb-2">Portfolio Status</h4>
+                    <p class="text-sm text-green-800">Your portfolio is well balanced!</p>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="h-80">
+                <canvas
+                  id="rebalancing-chart"
+                  phx-hook="Chart"
+                  data-chart-config={@optimization_results.rebalancing_chart_data}
+                >
+                </canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= if @optimization_results[:contribution_optimization] do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Contribution Optimization
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-green-900 mb-1">Employer Match</h4>
+                    <div class="text-xl font-bold text-green-900">
+                      {format_currency(
+                        @optimization_results.contribution_optimization.employer_match_captured
+                      )}
+                    </div>
+                    <div class="text-sm text-green-700">Additional annual matching</div>
+                  </div>
+                  <div class="bg-blue-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-blue-900 mb-1">Tax Savings</h4>
+                    <div class="text-xl font-bold text-blue-900">
+                      {format_currency(
+                        @optimization_results.contribution_optimization.tax_savings_estimate
+                      )}
+                    </div>
+                    <div class="text-sm text-blue-700">Estimated annual savings</div>
+                  </div>
+                </div>
+
+                <%= if not Enum.empty?(@optimization_results.contribution_optimization.recommended_allocations) do %>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-2">
+                      Recommended Monthly Allocations
+                    </h4>
+                    <div class="space-y-2">
+                      <%= for allocation <- @optimization_results.contribution_optimization.recommended_allocations do %>
+                        <div class="flex justify-between items-center text-sm">
+                          <div class="flex items-center">
+                            <span class="font-medium text-gray-800">
+                              {allocation.account_name}
+                            </span>
+                            <span class={[
+                              "ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                              case allocation.priority do
+                                :high -> "bg-red-100 text-red-800"
+                                :medium -> "bg-yellow-100 text-yellow-800"
+                                :low -> "bg-green-100 text-green-800"
+                                _ -> "bg-gray-100 text-gray-800"
+                              end
+                            ]}>
+                              {String.upcase(to_string(allocation.priority))}
+                            </span>
+                          </div>
+                          <span class="font-medium text-gray-900">
+                            {format_currency(allocation.monthly_amount)}/mo
+                          </span>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+
+                <%= if not Enum.empty?(@optimization_results.contribution_optimization.optimization_notes) do %>
+                  <div class="bg-blue-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-blue-900 mb-2">Optimization Notes</h4>
+                    <ul class="text-sm text-blue-800 space-y-1">
+                      <%= for note <- @optimization_results.contribution_optimization.optimization_notes do %>
+                        <li>• {note}</li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="h-80">
+                <canvas
+                  id="contribution-chart"
+                  phx-hook="Chart"
+                  data-chart-config={@optimization_results.contribution_chart_data}
+                >
+                </canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= if @optimization_results[:timeline_optimization] do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Retirement Timeline Optimization
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <%= if @optimization_results.timeline_optimization.optimal_retirement_age do %>
+                  <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-green-900 mb-2">
+                      Optimal Retirement Age
+                    </h4>
+                    <div class="text-3xl font-bold text-green-900">
+                      {@optimization_results.timeline_optimization.optimal_retirement_age.retirement_age}
+                    </div>
+                    <div class="text-sm text-green-700 mt-1">
+                      Success Rate: {format_percentage(
+                        @optimization_results.timeline_optimization.optimal_retirement_age.success_rate
+                      )}
+                    </div>
+                  </div>
+                <% end %>
+
+                <div class="grid grid-cols-1 gap-4">
+                  <%= if @optimization_results.timeline_optimization.conservative_option do %>
+                    <div class="bg-blue-50 rounded-lg p-4">
+                      <h4 class="text-sm font-medium text-blue-900 mb-1">Conservative Option</h4>
+                      <div class="text-xl font-bold text-blue-900">
+                        Age {@optimization_results.timeline_optimization.conservative_option.retirement_age}
+                      </div>
+                      <div class="text-sm text-blue-700">
+                        {format_percentage(
+                          @optimization_results.timeline_optimization.conservative_option.success_rate
+                        )} success rate
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <%= if @optimization_results.timeline_optimization.aggressive_option do %>
+                    <div class="bg-orange-50 rounded-lg p-4">
+                      <h4 class="text-sm font-medium text-orange-900 mb-1">Aggressive Option</h4>
+                      <div class="text-xl font-bold text-orange-900">
+                        Age {@optimization_results.timeline_optimization.aggressive_option.retirement_age}
+                      </div>
+                      <div class="text-sm text-orange-700">
+                        {format_percentage(
+                          @optimization_results.timeline_optimization.aggressive_option.success_rate
+                        )} success rate
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+
+                <%= if not Enum.empty?(@optimization_results.timeline_optimization.recommendations) do %>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-2">Recommendations</h4>
+                    <ul class="text-sm text-gray-700 space-y-1">
+                      <%= for rec <- @optimization_results.timeline_optimization.recommendations do %>
+                        <li>• {rec}</li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="h-80">
+                <canvas
+                  id="timeline-chart"
+                  phx-hook="Chart"
+                  data-chart-config={@optimization_results.timeline_chart_data}
+                >
+                </canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+<!-- Comprehensive Results -->
+      <%= if @optimization_results[:comprehensive_results] do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Comprehensive Optimization Summary
+            </h3>
+            
+<!-- Priority Actions -->
+            <%= if not Enum.empty?(@optimization_results.comprehensive_results.priority_actions) do %>
+              <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-900 mb-3">Priority Actions</h4>
+                <div class="space-y-3">
+                  <%= for action <- Enum.take(@optimization_results.comprehensive_results.priority_actions, 5) do %>
+                    <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+                      <div class={[
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                        priority_badge_color(action.priority_score)
+                      ]}>
+                        {priority_badge_text(action.priority_score)}
+                      </div>
+                      <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900">{action.description}</p>
+                        <div class="mt-1 flex items-center space-x-2">
+                          <span class="text-xs text-gray-500">Impact:</span>
+                          <span class={[
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
+                            impact_level_color(action.impact_level)
+                          ]}>
+                            {String.upcase(to_string(action.impact_level))}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+            
+<!-- Charts Grid for Comprehensive Results -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <%= if @optimization_results.monte_carlo_chart_data do %>
+                <div class="h-80">
+                  <canvas
+                    id="comprehensive-monte-carlo-chart"
+                    phx-hook="Chart"
+                    data-chart-config={@optimization_results.monte_carlo_chart_data}
+                  >
+                  </canvas>
+                </div>
+              <% end %>
+
+              <%= if @optimization_results.rebalancing_chart_data do %>
+                <div class="h-80">
+                  <canvas
+                    id="comprehensive-rebalancing-chart"
+                    phx-hook="Chart"
+                    data-chart-config={@optimization_results.rebalancing_chart_data}
+                  >
+                  </canvas>
+                </div>
+              <% end %>
+
+              <%= if @optimization_results.contribution_chart_data do %>
+                <div class="h-80">
+                  <canvas
+                    id="comprehensive-contribution-chart"
+                    phx-hook="Chart"
+                    data-chart-config={@optimization_results.contribution_chart_data}
+                  >
+                  </canvas>
+                </div>
+              <% end %>
+
+              <%= if @optimization_results.timeline_chart_data do %>
+                <div class="h-80">
+                  <canvas
+                    id="comprehensive-timeline-chart"
+                    phx-hook="Chart"
+                    data-chart-config={@optimization_results.timeline_chart_data}
+                  >
+                  </canvas>
+                </div>
+              <% end %>
+            </div>
+            
+<!-- Next Review Date -->
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <.icon name="hero-calendar" class="h-5 w-5 text-blue-400" />
+                </div>
+                <div class="ml-3">
+                  <h4 class="text-sm font-medium text-blue-800">Next Review Date</h4>
+                  <p class="text-sm text-blue-700 mt-1">
+                    {Date.to_string(@optimization_results.comprehensive_results.next_review_date)}
+                  </p>
+                  <p class="text-xs text-blue-600 mt-1">
+                    We recommend reviewing your optimization strategy quarterly to account for market changes and life events.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

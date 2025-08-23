@@ -21,11 +21,42 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import Chart from "../vendor/chart.umd.js"
+
+// Chart.js Hooks for Phoenix LiveView
+let Hooks = {}
+
+Hooks.Chart = {
+  mounted() {
+    const ctx = this.el.getContext('2d')
+    const config = JSON.parse(this.el.dataset.chartConfig)
+    
+    this.chart = new Chart(ctx, config)
+  },
+  
+  updated() {
+    if (this.chart) {
+      const config = JSON.parse(this.el.dataset.chartConfig)
+      
+      // Update chart data
+      this.chart.data = config.data
+      this.chart.options = config.options || this.chart.options
+      this.chart.update()
+    }
+  },
+  
+  destroyed() {
+    if (this.chart) {
+      this.chart.destroy()
+    }
+  }
+}
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: Hooks
 })
 
 // Show progress bar on live navigation and form submits

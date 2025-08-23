@@ -70,11 +70,13 @@ defmodule RetirementPlannerWeb.Router do
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
       
       # Dashboard routes
-      live "/dashboard", DashboardLive, :index
-      live "/dashboard/goal/new", DashboardLive, :new_goal
-      live "/dashboard/goal/edit/:id", DashboardLive, :edit_goal
-      live "/dashboard/accounts/new", DashboardLive, :new_account
-      live "/dashboard/investments/new", DashboardLive, :new_investment
+    live "/dashboard", DashboardLive, :index
+    live "/dashboard/goal/new", DashboardLive, :new_goal
+    live "/dashboard/goal/edit/:id", DashboardLive, :edit_goal
+    live "/dashboard/accounts/new", DashboardLive, :new_account
+    live "/dashboard/investments/new", DashboardLive, :new_investment
+    
+    live "/optimization", OptimizationLive, :index
     end
   end
 

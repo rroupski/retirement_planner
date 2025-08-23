@@ -3,8 +3,10 @@ defmodule RetirementPlannerWeb.DashboardLive do
 
   alias RetirementPlanner.Planning
   alias RetirementPlanner.Planning.{RetirementGoal, RetirementAccount, Investment}
-
-  @impl true
+  alias RetirementPlanner.Charts
+  alias RetirementPlannerWeb.RetirementGoalFormComponent
+  alias RetirementPlannerWeb.RetirementAccountFormComponent
+  alias RetirementPlannerWeb.InvestmentFormComponent
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
     
@@ -84,6 +86,7 @@ defmodule RetirementPlannerWeb.DashboardLive do
         |> assign(:accounts, accounts)
         |> assign(:investments, investments)
         |> assign(:projection, projection)
+        |> assign_chart_data(goal, accounts, investments, projection)
         
       {:error, :not_found} -> 
         {:ok, accounts} = Planning.list_user_retirement_accounts(user.id)
@@ -95,6 +98,7 @@ defmodule RetirementPlannerWeb.DashboardLive do
         |> assign(:accounts, accounts)
         |> assign(:investments, investments)
         |> assign(:projection, nil)
+        |> assign_chart_data(nil, accounts, investments, nil)
     end
   end
 
@@ -106,6 +110,19 @@ defmodule RetirementPlannerWeb.DashboardLive do
     decimal
     |> Decimal.to_float()
     |> format_currency()
+  end
+
+  defp assign_chart_data(socket, goal, accounts, investments, projection) do
+    account_chart = Charts.account_allocation_chart(accounts) |> Jason.encode!()
+    projection_chart = Charts.retirement_projection_chart(projection, goal, accounts) |> Jason.encode!()
+    investment_chart = Charts.investment_allocation_chart(investments) |> Jason.encode!()
+    savings_chart = Charts.savings_scenarios_chart(projection, goal) |> Jason.encode!()
+    
+    socket
+    |> assign(:account_chart_data, account_chart)
+    |> assign(:projection_chart_data, projection_chart)
+    |> assign(:investment_chart_data, investment_chart)
+    |> assign(:savings_chart_data, savings_chart)
   end
 
   defp risk_badge_class("Low"), do: "bg-green-100 text-green-800"

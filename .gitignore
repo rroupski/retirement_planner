@@ -35,3 +35,4 @@ retirement_planner-*.tar
 npm-debug.log
 /assets/node_modules/
 
+server.log
