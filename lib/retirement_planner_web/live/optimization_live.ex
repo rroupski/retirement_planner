@@ -2,7 +2,7 @@ defmodule RetirementPlannerWeb.OptimizationLive do
   use RetirementPlannerWeb, :live_view
 
   alias RetirementPlanner.{Planning, Optimization, Charts}
-  alias RetirementPlanner.Planning.{RetirementGoal, RetirementAccount, Investment}
+  alias RetirementPlanner.Planning.{RetirementGoal}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -30,34 +30,35 @@ defmodule RetirementPlannerWeb.OptimizationLive do
   @impl true
   def handle_event("run_monte_carlo", _params, socket) do
     user_id = socket.assigns.current_user.id
-    
+
     socket = assign(socket, :loading_optimization, true)
     send(self(), {:run_monte_carlo_simulation, user_id})
-    
+
     {:noreply, socket}
   end
 
   def handle_event("run_asset_optimization", _params, socket) do
     user_id = socket.assigns.current_user.id
-    
+
     socket = assign(socket, :loading_optimization, true)
     send(self(), {:run_asset_optimization, user_id})
-    
+
     {:noreply, socket}
   end
 
   def handle_event("run_contribution_optimization", %{"monthly_amount" => monthly_amount}, socket) do
     user_id = socket.assigns.current_user.id
-    
+
     case Float.parse(monthly_amount) do
       {amount, _} when amount > 0 ->
-        socket = socket
-        |> assign(:loading_optimization, true)
-        |> assign(:available_monthly_amount, amount)
-        
+        socket =
+          socket
+          |> assign(:loading_optimization, true)
+          |> assign(:available_monthly_amount, amount)
+
         send(self(), {:run_contribution_optimization, user_id, amount})
         {:noreply, socket}
-      
+
       _ ->
         socket = put_flash(socket, :error, "Please enter a valid monthly amount")
         {:noreply, socket}
@@ -66,25 +67,30 @@ defmodule RetirementPlannerWeb.OptimizationLive do
 
   def handle_event("run_timeline_optimization", _params, socket) do
     user_id = socket.assigns.current_user.id
-    
+
     socket = assign(socket, :loading_optimization, true)
     send(self(), {:run_timeline_optimization, user_id})
-    
+
     {:noreply, socket}
   end
 
-  def handle_event("run_comprehensive_optimization", %{"monthly_amount" => monthly_amount}, socket) do
+  def handle_event(
+        "run_comprehensive_optimization",
+        %{"monthly_amount" => monthly_amount},
+        socket
+      ) do
     user_id = socket.assigns.current_user.id
-    
+
     case Float.parse(monthly_amount) do
       {amount, _} when amount > 0 ->
-        socket = socket
-        |> assign(:loading_optimization, true)
-        |> assign(:available_monthly_amount, amount)
-        
+        socket =
+          socket
+          |> assign(:loading_optimization, true)
+          |> assign(:available_monthly_amount, amount)
+
         send(self(), {:run_comprehensive_optimization, user_id, amount})
         {:noreply, socket}
-      
+
       _ ->
         # Run without contribution optimization if no amount provided
         socket = assign(socket, :loading_optimization, true)
@@ -94,7 +100,7 @@ defmodule RetirementPlannerWeb.OptimizationLive do
   end
 
   def handle_event("clear_results", _params, socket) do
-    {:noreply, 
+    {:noreply,
      socket
      |> assign(:optimization_results, nil)
      |> assign(:available_monthly_amount, nil)}
@@ -104,19 +110,19 @@ defmodule RetirementPlannerWeb.OptimizationLive do
   def handle_info({:run_monte_carlo_simulation, user_id}, socket) do
     case Optimization.monte_carlo_simulation(user_id, 5_000) do
       {:error, reason} ->
-        {:noreply, 
+        {:noreply,
          socket
          |> assign(:loading_optimization, false)
          |> put_flash(:error, "Error running Monte Carlo simulation: #{inspect(reason)}")}
-      
+
       results ->
         monte_carlo_chart_data = Charts.monte_carlo_chart(results) |> Jason.encode!()
-        
+
         optimization_results = %{
           monte_carlo: results,
           monte_carlo_chart_data: monte_carlo_chart_data
         }
-        
+
         {:noreply,
          socket
          |> assign(:optimization_results, optimization_results)
@@ -132,15 +138,16 @@ defmodule RetirementPlannerWeb.OptimizationLive do
          socket
          |> assign(:loading_optimization, false)
          |> put_flash(:error, "Error running asset optimization: #{inspect(reason)}")}
-      
+
       results ->
-        rebalancing_chart_data = Charts.rebalancing_chart(results.rebalancing_recommendations) |> Jason.encode!()
-        
+        rebalancing_chart_data =
+          Charts.rebalancing_chart(results.rebalancing_recommendations) |> Jason.encode!()
+
         optimization_results = %{
           asset_optimization: results,
           rebalancing_chart_data: rebalancing_chart_data
         }
-        
+
         {:noreply,
          socket
          |> assign(:optimization_results, optimization_results)
@@ -156,15 +163,16 @@ defmodule RetirementPlannerWeb.OptimizationLive do
          socket
          |> assign(:loading_optimization, false)
          |> put_flash(:error, "Error running contribution optimization: #{inspect(reason)}")}
-      
+
       results ->
-        contribution_chart_data = Charts.contribution_optimization_chart(results) |> Jason.encode!()
-        
+        contribution_chart_data =
+          Charts.contribution_optimization_chart(results) |> Jason.encode!()
+
         optimization_results = %{
           contribution_optimization: results,
           contribution_chart_data: contribution_chart_data
         }
-        
+
         {:noreply,
          socket
          |> assign(:optimization_results, optimization_results)
@@ -180,15 +188,15 @@ defmodule RetirementPlannerWeb.OptimizationLive do
          socket
          |> assign(:loading_optimization, false)
          |> put_flash(:error, "Error running timeline optimization: #{inspect(reason)}")}
-      
+
       results ->
         timeline_chart_data = Charts.timeline_optimization_chart(results) |> Jason.encode!()
-        
+
         optimization_results = %{
           timeline_optimization: results,
           timeline_chart_data: timeline_chart_data
         }
-        
+
         {:noreply,
          socket
          |> assign(:optimization_results, optimization_results)
@@ -204,33 +212,40 @@ defmodule RetirementPlannerWeb.OptimizationLive do
          socket
          |> assign(:loading_optimization, false)
          |> put_flash(:error, "Error running comprehensive optimization: #{inspect(reason)}")}
-      
+
       results ->
         # Generate all chart data
-        monte_carlo_chart_data = if results.risk_analysis do
-          Charts.monte_carlo_chart(results.risk_analysis) |> Jason.encode!()
-        else
-          nil
-        end
-        
-        rebalancing_chart_data = if results.asset_allocation && length(results.asset_allocation.rebalancing_recommendations) > 0 do
-          Charts.rebalancing_chart(results.asset_allocation.rebalancing_recommendations) |> Jason.encode!()
-        else
-          nil
-        end
-        
-        contribution_chart_data = if results.contribution_strategy do
-          Charts.contribution_optimization_chart(results.contribution_strategy) |> Jason.encode!()
-        else
-          nil
-        end
-        
-        timeline_chart_data = if results.timeline_optimization do
-          Charts.timeline_optimization_chart(results.timeline_optimization) |> Jason.encode!()
-        else
-          nil
-        end
-        
+        monte_carlo_chart_data =
+          if results.risk_analysis do
+            Charts.monte_carlo_chart(results.risk_analysis) |> Jason.encode!()
+          else
+            nil
+          end
+
+        rebalancing_chart_data =
+          if results.asset_allocation &&
+               length(results.asset_allocation.rebalancing_recommendations) > 0 do
+            Charts.rebalancing_chart(results.asset_allocation.rebalancing_recommendations)
+            |> Jason.encode!()
+          else
+            nil
+          end
+
+        contribution_chart_data =
+          if results.contribution_strategy do
+            Charts.contribution_optimization_chart(results.contribution_strategy)
+            |> Jason.encode!()
+          else
+            nil
+          end
+
+        timeline_chart_data =
+          if results.timeline_optimization do
+            Charts.timeline_optimization_chart(results.timeline_optimization) |> Jason.encode!()
+          else
+            nil
+          end
+
         optimization_results = %{
           comprehensive_results: results,
           monte_carlo_chart_data: monte_carlo_chart_data,
@@ -238,7 +253,7 @@ defmodule RetirementPlannerWeb.OptimizationLive do
           contribution_chart_data: contribution_chart_data,
           timeline_chart_data: timeline_chart_data
         }
-        
+
         {:noreply,
          socket
          |> assign(:optimization_results, optimization_results)

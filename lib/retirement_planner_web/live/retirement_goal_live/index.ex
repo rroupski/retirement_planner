@@ -5,8 +5,8 @@ defmodule RetirementPlannerWeb.RetirementGoalLive.Index do
   alias RetirementPlanner.Planning.RetirementGoal
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, stream(socket, :retirement_goals, Planning.list_retirement_goals())}
+  def mount(_params, %{"id" => id}, socket) do
+    {:ok, stream(socket, :retirement_goals, Planning.get_retirement_goal!(id))}
   end
 
   @impl true
@@ -33,7 +33,10 @@ defmodule RetirementPlannerWeb.RetirementGoalLive.Index do
   end
 
   @impl true
-  def handle_info({RetirementPlannerWeb.RetirementGoalLive.FormComponent, {:saved, retirement_goal}}, socket) do
+  def handle_info(
+        {RetirementPlannerWeb.RetirementGoalLive.FormComponent, {:saved, retirement_goal}},
+        socket
+      ) do
     {:noreply, stream_insert(socket, :retirement_goals, retirement_goal)}
   end
 

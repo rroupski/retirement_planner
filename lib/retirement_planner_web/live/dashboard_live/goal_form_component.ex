@@ -2,14 +2,13 @@ defmodule RetirementPlannerWeb.DashboardLive.GoalFormComponent do
   use RetirementPlannerWeb, :live_component
 
   alias RetirementPlanner.Planning
-  alias RetirementPlanner.Planning.RetirementGoal
 
   @impl true
   def render(assigns) do
     ~H"""
     <div>
       <.header>
-        <%= @title %>
+        {@title}
         <:subtitle>Set your retirement planning goals to get personalized projections</:subtitle>
       </.header>
 
@@ -55,7 +54,7 @@ defmodule RetirementPlannerWeb.DashboardLive.GoalFormComponent do
           required
           placeholder="e.g., 2.5"
         />
-        
+
         <:actions>
           <.button phx-disable-with="Saving...">Save Goal</.button>
         </:actions>
@@ -101,7 +100,7 @@ defmodule RetirementPlannerWeb.DashboardLive.GoalFormComponent do
 
   defp save_goal(socket, :new_goal, goal_params) do
     goal_params_with_user = Map.put(goal_params, "user_id", socket.assigns.goal.user_id)
-    
+
     case Planning.create_retirement_goal(goal_params_with_user) do
       {:ok, goal} ->
         notify_parent({:saved, goal})

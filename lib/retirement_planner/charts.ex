@@ -12,7 +12,8 @@ defmodule RetirementPlanner.Charts do
     if Enum.empty?(accounts) do
       empty_chart_config("No Accounts", "Add retirement accounts to see allocation")
     else
-      total =
+      # TODO: do I need it?
+      _total =
         Enum.reduce(accounts, Decimal.new(0), fn acc, sum ->
           Decimal.add(sum, acc.current_balance || Decimal.new(0))
         end)
@@ -96,7 +97,8 @@ defmodule RetirementPlanner.Charts do
 
       projected_values =
         Enum.map(years, fn year ->
-          age = goal.current_age + year
+          # TODO: do I need it?
+          _age = goal.current_age + year
 
           if year == 0 do
             current_total
@@ -372,7 +374,8 @@ defmodule RetirementPlanner.Charts do
 
   # Private helper functions
 
-  defp empty_chart_config(title, subtitle) do
+  # TODO: where can I show subtitle?
+  defp empty_chart_config(title, _subtitle) do
     %{
       type: "doughnut",
       data: %{
@@ -642,7 +645,8 @@ defmodule RetirementPlanner.Charts do
     if Enum.empty?(scenarios) do
       empty_chart_config("Timeline Optimization", "No scenarios available")
     else
-      feasible_scenarios = Enum.filter(scenarios, & &1.feasible)
+      # TODO: do I need it?
+      _feasible_scenarios = Enum.filter(scenarios, & &1.feasible)
 
       {ages, success_rates, overall_scores} =
         scenarios

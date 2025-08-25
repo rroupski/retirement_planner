@@ -2,14 +2,13 @@ defmodule RetirementPlannerWeb.DashboardLive.InvestmentFormComponent do
   use RetirementPlannerWeb, :live_component
 
   alias RetirementPlanner.Planning
-  alias RetirementPlanner.Planning.Investment
 
   @impl true
   def render(assigns) do
     ~H"""
     <div>
       <.header>
-        <%= @title %>
+        {@title}
         <:subtitle>Define your investment allocations for more accurate projections</:subtitle>
       </.header>
 
@@ -27,14 +26,14 @@ defmodule RetirementPlannerWeb.DashboardLive.InvestmentFormComponent do
           required
           placeholder="e.g., S&P 500 Index Fund"
         />
-        
+
         <.input
           field={@form[:symbol]}
           type="text"
           label="Symbol (Optional)"
           placeholder="e.g., VOO, VTSAX"
         />
-        
+
         <.input
           field={@form[:allocation_percentage]}
           type="number"
@@ -45,7 +44,7 @@ defmodule RetirementPlannerWeb.DashboardLive.InvestmentFormComponent do
           required
           placeholder="e.g., 70"
         />
-        
+
         <.input
           field={@form[:expected_return]}
           type="number"
@@ -56,7 +55,7 @@ defmodule RetirementPlannerWeb.DashboardLive.InvestmentFormComponent do
           required
           placeholder="e.g., 7.5"
         />
-        
+
         <.input
           field={@form[:risk_level]}
           type="select"
@@ -69,17 +68,22 @@ defmodule RetirementPlannerWeb.DashboardLive.InvestmentFormComponent do
           ]}
           required
         />
-        
+
         <div class="mt-4 p-4 bg-blue-50 rounded-lg">
           <h4 class="text-sm font-medium text-blue-900 mb-2">Investment Guidelines:</h4>
           <ul class="text-sm text-blue-700 space-y-1">
-            <li>• <strong>Stocks/Equity Funds:</strong> Typically 6-10% expected return, Medium-High risk</li>
-            <li>• <strong>Bonds/Bond Funds:</strong> Typically 2-5% expected return, Low-Medium risk</li>
+            <li>
+              • <strong>Stocks/Equity Funds:</strong>
+              Typically 6-10% expected return, Medium-High risk
+            </li>
+            <li>
+              • <strong>Bonds/Bond Funds:</strong> Typically 2-5% expected return, Low-Medium risk
+            </li>
             <li>• <strong>Index Funds:</strong> Typically 7-9% expected return, Medium risk</li>
             <li>• <strong>Target Date Funds:</strong> Typically 6-8% expected return, Medium risk</li>
           </ul>
         </div>
-        
+
         <:actions>
           <.button phx-disable-with="Saving...">Save Investment</.button>
         </:actions>
@@ -124,8 +128,9 @@ defmodule RetirementPlannerWeb.DashboardLive.InvestmentFormComponent do
   end
 
   defp save_investment(socket, :new_investment, investment_params) do
-    investment_params_with_user = Map.put(investment_params, "user_id", socket.assigns.investment.user_id)
-    
+    investment_params_with_user =
+      Map.put(investment_params, "user_id", socket.assigns.investment.user_id)
+
     case Planning.create_investment(investment_params_with_user) do
       {:ok, investment} ->
         notify_parent({:saved, investment})
