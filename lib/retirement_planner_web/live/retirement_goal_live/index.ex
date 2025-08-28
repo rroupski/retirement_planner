@@ -5,8 +5,10 @@ defmodule RetirementPlannerWeb.RetirementGoalLive.Index do
   alias RetirementPlanner.Planning.RetirementGoal
 
   @impl true
-  def mount(_params, %{"id" => id}, socket) do
-    {:ok, stream(socket, :retirement_goals, Planning.get_retirement_goal!(id))}
+  def mount(_params, _session, socket) do
+    current_user = socket.assigns.current_user
+    retirement_goals = Planning.list_user_retirement_goals(current_user.id)
+    {:ok, stream(socket, :retirement_goals, retirement_goals)}
   end
 
   @impl true

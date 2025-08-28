@@ -231,6 +231,14 @@ defmodule RetirementPlanner.Planning do
   end
 
   # CRUD functions for retirement goals
+  def list_retirement_goals do
+    Repo.all(RetirementGoal)
+  end
+
+  def list_user_retirement_goals(user_id) do
+    Repo.all(from g in RetirementGoal, where: g.user_id == ^user_id)
+  end
+
   def get_user_retirement_goal(user_id) do
     case Repo.get_by(RetirementGoal, user_id: user_id) do
       nil -> {:error, :not_found}

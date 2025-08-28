@@ -67,7 +67,10 @@ defmodule RetirementPlannerWeb.RetirementGoalLive.FormComponent do
   end
 
   defp save_retirement_goal(socket, :new, retirement_goal_params) do
-    case Planning.create_retirement_goal(retirement_goal_params) do
+    # Add current user ID to the params
+    retirement_goal_params_with_user = Map.put(retirement_goal_params, "user_id", socket.assigns.current_user.id)
+    
+    case Planning.create_retirement_goal(retirement_goal_params_with_user) do
       {:ok, retirement_goal} ->
         notify_parent({:saved, retirement_goal})
 

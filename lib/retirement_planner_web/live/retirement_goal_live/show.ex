@@ -16,6 +16,14 @@ defmodule RetirementPlannerWeb.RetirementGoalLive.Show do
      |> assign(:retirement_goal, Planning.get_retirement_goal!(id))}
   end
 
+  @impl true
+  def handle_info(
+        {RetirementPlannerWeb.RetirementGoalLive.FormComponent, {:saved, retirement_goal}},
+        socket
+      ) do
+    {:noreply, assign(socket, :retirement_goal, retirement_goal)}
+  end
+
   defp page_title(:show), do: "Show Retirement goal"
   defp page_title(:edit), do: "Edit Retirement goal"
 end
