@@ -71,6 +71,7 @@ defmodule RetirementPlannerWeb.Router do
       
       # Dashboard routes
     live "/dashboard", DashboardLive, :index
+    live "/planner", DashboardLive, :index
     live "/dashboard/goal/new", DashboardLive, :new_goal
     live "/dashboard/goal/edit/:id", DashboardLive, :edit_goal
     live "/dashboard/accounts/new", DashboardLive, :new_account

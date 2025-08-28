@@ -2,7 +2,7 @@
   Retirement goal {@retirement_goal.id}
   <:subtitle>This is a retirement_goal record from your database.</:subtitle>
   <:actions>
-    <.link patch={~p"/goals/#{@retirement_goal}/show/edit"} phx-click={JS.push_focus()}>
+    <.link patch={~p"/goals/#{@retirement_goal}/edit"} phx-click={JS.push_focus()}>
       <.button>Edit retirement_goal</.button>
     </.link>
   </:actions>
