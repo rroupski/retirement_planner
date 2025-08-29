@@ -19,13 +19,18 @@ A comprehensive Elixir Phoenix web application for retirement planning calculati
 
 - Elixir 1.14+ and Erlang/OTP 25+
 - PostgreSQL 14+
-- Node.js 18+ (for asset compilation)
+  - Hints:
+    Ensure PostgreSQL is installed and running before proceeding.
+    In development, the project uses the "postgres" user, perhaps create the user "postgres", so you don't have to change the config/dev.exs database configuration:
+    ```bash
+    psql -d postgres -c "CREATE USER postgres WITH SUPERUSER CREATEDB CREATEROLE;"
+    ```
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/retirement_planner.git
+   git clone https://github.com/rroupski/retirement_planner.git
    cd retirement_planner
    ```
 
@@ -53,7 +58,7 @@ mix deps.get
 
 # Database operations
 mix ecto.create              # Create database
-mix ecto.migrate             # Run migrations  
+mix ecto.migrate             # Run migrations
 mix ecto.reset               # Drop and recreate database with seeds
 
 # Start server with IEx console
