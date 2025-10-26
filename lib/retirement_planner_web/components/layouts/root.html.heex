@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="RetirementPlanner" suffix=" · Phoenix Framework">
+    <.live_title default="RetirementPlanner">
       {assigns[:page_title]}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
@@ -17,7 +17,7 @@
         <li>
           <.link
             href={~p"/dashboard"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-gray-900 font-semibold hover:text-gray-700"
           >
             Dashboard
           </.link>
@@ -25,18 +25,18 @@
         <li>
           <.link
             href={~p"/optimization"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-gray-900 font-semibold hover:text-gray-700"
           >
             Optimization
           </.link>
         </li>
-        <li class="text-[0.8125rem] leading-6 text-zinc-900">
+        <li class="text-[0.8125rem] leading-6 text-gray-900">
           {@current_user.email}
         </li>
         <li>
           <.link
             href={~p"/users/settings"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-gray-900 font-semibold hover:text-gray-700"
           >
             Settings
           </.link>
@@ -45,7 +45,7 @@
           <.link
             href={~p"/users/log_out"}
             method="delete"
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-gray-900 font-semibold hover:text-gray-700"
           >
             Log out
           </.link>
@@ -54,7 +54,7 @@
         <li>
           <.link
             href={~p"/users/register"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-gray-900 font-semibold hover:text-gray-700"
           >
             Register
           </.link>
@@ -62,7 +62,7 @@
         <li>
           <.link
             href={~p"/users/log_in"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-gray-900 font-semibold hover:text-gray-700"
           >
             Log in
           </.link>
